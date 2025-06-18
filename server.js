@@ -4,8 +4,8 @@ const cors = require('cors');
 const app = express();
 
 const africastalking = require('africastalking')({
-    apiKey: atsk_0ac93843668f1bf6330c1cc6afd2bd37007af81a27df31028e7e4d9dee6491b8eb71e883,
-    username: sandbox
+    apiKey: process.env.AT_API_KEY,
+    username: process.env.AT_USERNAME
 });
 
 app.use(cors());
