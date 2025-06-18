@@ -17,6 +17,8 @@ exports.sendSmsReminders = functions.pubsub.schedule("every day 08:00")
       const payments = tenant.payments || [];
       const monthlyRent = tenant.monthlyRent;
       const originalDueDate = tenant.nextDueDate;
+      const formattedAmount = amountOwed.toLocaleString();
+
 
       if (!monthlyRent || !originalDueDate || !tenant.phone) return;
 
