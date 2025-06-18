@@ -4,8 +4,8 @@ const cors = require('cors');
 const app = express();
 
 const africastalking = require('africastalking')({
-    apiKey: process.env.AT_API_KEY,
-    username: process.env.AT_USERNAME
+    apiKey: process.env.atsk_0ac93843668f1bf6330c1cc6afd2bd37007af81a27df31028e7e4d9dee6491b8eb71e883,
+    username: process.sandbox
 });
 
 app.use(cors());
@@ -26,8 +26,8 @@ app.post('/send-sms', async (req, res) => {
         };
 
         // Optional: only include sender ID if set
-        if (process.env.AT_SENDER_ID) {
-            options.from = process.env.AT_SENDER_ID;
+        if (process.env.MUHWEZIMGT) {
+            options.from = process.env.MUHWEZIMGT;
         }
 
         const response = await sms.send(options);
@@ -39,7 +39,7 @@ app.post('/send-sms', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });

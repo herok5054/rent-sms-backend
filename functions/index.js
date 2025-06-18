@@ -1,18 +1,14 @@
-const { onSchedule } = require("firebase-functions/v2/scheduler");
+const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const axios = require("axios");
 
 admin.initializeApp();
 const db = admin.firestore();
 
-
-// Use this instead of Cloud Run-style container
-exports.sendSmsReminders = onSchedule(
-  {
-    schedule: "every day 08:00",
-    timeZone: "Africa/Kampala",
-  },
-  async (context) => {
+// 👉 Use GCFv1 syntax (no `.region()` or `.v2`)
+exports.sendSmsReminders = functions.pubsub.schedule("every day 08:00")
+  .timeZone("Africa/Kampala")
+  .onRun(async (context) => {
     console.log("⏰ Running daily SMS reminders...");
 
     const snapshot = await db.collection("tenants").get();
@@ -24,24 +20,21 @@ exports.sendSmsReminders = onSchedule(
 
       if (!monthlyRent || !originalDueDate || !tenant.phone) return;
 
-      const { status, daysUntilDue, amountOwed } = getRentStatus(
-        payments,
-        monthlyRent,
-        originalDueDate
-      );
+      const { status, daysUntilDue, amountOwed } = getRentStatus(payments, monthlyRent, originalDueDate);
 
       if (amountOwed <= 0) return;
 
       let message = "";
       if (status === "Due Soon" && daysUntilDue === 7) {
-        message = `Hello ${tenant.name}. This is a reminder that your rent of ${amountOwed} is due in 7 days.`;
+        message = `Hello ${tenant.name} in ${tenant.block}, ${tenant.room}. This is a reminder that your rent of UGX${formattedAmount} is due in 7 days.`;
       } else if (status === "Due Today") {
-        message = `Hello ${tenant.name}. Your rent of ${amountOwed} is due today. Please pay accordingly.`;
+        message = `Hello ${tenant.name} in ${tenant.block}, ${tenant.room}. Your rent of UGX${formattedAmount} is due today. Please pay accordingly.`;
       }
+
 
       if (message) {
         try {
-          const response = await axios.post("http://localhost:5000/send-sms", {
+          const response = await axios.post("https://rent-sms-backend.onrender.com/send-sms", {
             phoneNumber: tenant.phone,
             message,
           });
@@ -51,8 +44,10 @@ exports.sendSmsReminders = onSchedule(
         }
       }
     });
-  }
-);
+  });
+
+// ... (keep the rest of the code for addMonthsKeepDate and getRentStatus)
+
 
 
 function addMonthsKeepDate(date, months) {
@@ -107,7 +102,7 @@ function getRentStatus(payments = [], monthlyRent, originalDueDate) {
   daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
   let status = "On Time";
   if (daysUntilDue <= 7 && daysUntilDue > 0) status = "Due Soon";
-  else if (daysUntilDue === 0) status = "Due Today";
+  else if (daysUntilDue === 1) status = "Due Today";
 
   return {
     status,
