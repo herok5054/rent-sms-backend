@@ -1,1 +1,1 @@
-This project is an automatic rent tracker that helps to do the mathematics for hundreds of tenants through simple but manual input of data into the system. The system not only calculates how much a tenant is due to pay for a month but is continuous and adds rent to the next month from when the tenant is registered. 
+
